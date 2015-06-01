@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Debtor {
+
+    private String debtorId;
+
     private String name;
 
     private String address;
@@ -18,6 +21,14 @@ public class Debtor {
 
     Debtor() {
         details = new ArrayList<DebtDetail>();
+    }
+
+    public String getDebtorId() {
+        return debtorId;
+    }
+
+    public void setDebtorId(String debtorId) {
+        this.debtorId = debtorId;
     }
 
     public String getName() {

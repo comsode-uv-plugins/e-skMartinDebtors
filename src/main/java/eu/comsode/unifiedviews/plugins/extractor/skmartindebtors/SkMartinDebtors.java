@@ -57,11 +57,11 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SkMartinDebtors.class);
 
-    private static final String INPUT_URL = "http://egov.martin.sk/Default.aspx?NavigationState=806:0:";
+    public static final String INPUT_URL = "http://egov.martin.sk/Default.aspx?NavigationState=806:0:";
 
     private static final String OUTPUT_FILE_NAME = "dlznici.csv";
 
-    private static final String CSV_HEADER = "\"Dlžník\";\"Adresa dlžníka\";\"Mesto\";\"Typ dane\";\"Suma daòových nedoplatkov\";\"Mena\";\"Variabilný symbol\";\"Špecifický symbol\"";
+    private static final String CSV_HEADER = "\"ID\";\"Dlžník\";\"Adresa dlžníka\";\"Mesto\";\"Typ dane\";\"Suma daòových nedoplatkov\";\"Mena\";\"Variabilný symbol\";\"Špecifický symbol\"";
 
     @DataUnit.AsOutput(name = "filesOutput")
     public WritableFilesDataUnit filesOutput;
@@ -97,8 +97,9 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
     @Override
     protected void innerExecute() throws DPUException {
         File outputFile = null;
+        int debtorsCount = 0;
         try {
-            outputFile = File.createTempFile("____", "csv", new File(URI.create(filesOutput.getBaseFileURIString())));
+            outputFile = File.createTempFile("____", ".csv", new File(URI.create(filesOutput.getBaseFileURIString())));
         } catch (IOException | DataUnitException ex) {
             throw ContextUtils.dpuException(ctx, ex, "SkMartinDebtors.execute.exception");
         }
@@ -151,9 +152,10 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
                 Element body = content.select("tbody").first();
                 Elements links = body.select("tr");
                 for (Element link : links) {
+                    List<String> mainInfo = new ArrayList<String>();
+                    mainInfo.add(link.attr("rid"));
                     Elements tds = link.select("td");
                     boolean detailTd = true;
-                    List<String> mainInfo = new ArrayList<String>();
                     for (Element td : tds) {
                         if (detailTd) {
                             detailTd = false;
@@ -219,9 +221,11 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
                         debtor.addDetail(getDetails(nextVeryDetailTable));
                     }
                     for (DebtDetail dd : debtor.getDetails()) {
-                        outputWriter.println("\"" + debtor.getName() + "\";\"" + debtor.getAddress() + "\";\"" + debtor.getCity() + "\";\"" + dd.getDebtType() + "\";\"" + dd.getDebtSumForType().toString() + "\";\"" + dd.getCurrency() + "\";\"" + dd.getVariableSymbol() + "\";\""
+                        outputWriter.println("\"" + debtor.getDebtorId() + "\";\"" + debtor.getName() + "\";\"" + debtor.getAddress() + "\";\"" + debtor.getCity() + "\";\"" + dd.getDebtType() + "\";\"" + dd.getDebtSumForType().toString() + "\";\"" + dd.getCurrency() + "\";\""
+                                + dd.getVariableSymbol() + "\";\""
                                 + dd.getSpecificSymbol() + "\"");
                     }
+                    debtorsCount++;
                 }
                 Element pagingControl = doc.select("span.PagingControl").first();
                 int activePage = Integer.parseInt(pagingControl.attr("actPage"));
@@ -246,12 +250,13 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
                 response = getDetailInfo(httpclient, sessionId, nextPagePostParamsMap);
 
             } while (true);
+            LOG.info("Number of scraped debtors: " + debtorsCount);
             Resource resource = ResourceHelpers.getResource(filesOutput, OUTPUT_FILE_NAME);
             resource.setLast_modified(new Date());
             resource.setMimetype("text/csv");
             resource.setSize(outputFile.length());
             ResourceHelpers.setResource(filesOutput, OUTPUT_FILE_NAME, resource);
-            filesOutput.updateExistingFileURI(OUTPUT_FILE_NAME, outputFile.toURI().toASCIIString());
+            filesOutput.addExistingFile(OUTPUT_FILE_NAME, outputFile.toURI().toASCIIString());
         } catch (Exception ex) {
             throw ContextUtils.dpuException(ctx, ex, "SkMartinDebtors.execute.exception");
         }
@@ -260,11 +265,12 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
 
     private Debtor fillDebtorMainInfo(List<String> mainInfo) {
         Debtor debtor = new Debtor();
-        debtor.setName(mainInfo.get(0));
-        debtor.setAddress(mainInfo.get(1));
-        debtor.setCity(mainInfo.get(2));
-        debtor.setDebtsSum(normalizeSum(mainInfo.get(3)));
-        debtor.setCurrency(mainInfo.get(4));
+        debtor.setDebtorId(mainInfo.get(0));
+        debtor.setName(mainInfo.get(1));
+        debtor.setAddress(mainInfo.get(2));
+        debtor.setCity(mainInfo.get(3));
+        debtor.setDebtsSum(normalizeSum(mainInfo.get(4)));
+        debtor.setCurrency(mainInfo.get(5));
         return debtor;
     }
 
