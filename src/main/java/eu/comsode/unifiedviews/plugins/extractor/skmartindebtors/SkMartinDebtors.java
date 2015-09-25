@@ -62,7 +62,7 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
 
     private static final String OUTPUT_FILE_NAME = "dlznici.csv";
 
-    private static final String CSV_HEADER = "\"ID\";\"Dl�n�k\";\"Adresa dl�n�ka\";\"Mesto\";\"Typ dane\";\"Suma da�ov�ch nedoplatkov\";\"Mena\";\"Variabiln� symbol\";\"�pecifick� symbol\"";
+    private static final String CSV_HEADER = "\"ID\";\"Dlžník\";\"Adresa dlžníka\";\"Mesto\";\"Typ dane\";\"Suma daňových nedoplatkov\";\"Mena\";\"Variabilný symbol\";\"Špecifický symbol\"";
 
     @DataUnit.AsOutput(name = "filesOutput")
     public WritableFilesDataUnit filesOutput;
