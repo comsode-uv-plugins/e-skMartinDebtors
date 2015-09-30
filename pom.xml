@@ -46,18 +46,6 @@
       		<version>1.8.2</version>
 			<scope>compile</scope>
     	</dependency>
-		<!-- UNIT Test dependencies. -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!-- Core UnifiedViews testing support. -->
-		<dependency>
-			<groupId>eu.unifiedviews</groupId>
-			<artifactId>module-test</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<repositories>
