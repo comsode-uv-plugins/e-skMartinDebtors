@@ -45,6 +45,7 @@ import eu.unifiedviews.dpu.DPU;
 import eu.unifiedviews.dpu.DPUException;
 import eu.unifiedviews.helpers.dataunit.resource.Resource;
 import eu.unifiedviews.helpers.dataunit.resource.ResourceHelpers;
+import eu.unifiedviews.helpers.dataunit.virtualpath.VirtualPathHelpers;
 import eu.unifiedviews.helpers.dpu.config.ConfigHistory;
 import eu.unifiedviews.helpers.dpu.context.ContextUtils;
 import eu.unifiedviews.helpers.dpu.exec.AbstractDpu;
@@ -61,7 +62,7 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
 
     private static final String OUTPUT_FILE_NAME = "dlznici.csv";
 
-    private static final String CSV_HEADER = "\"ID\";\"Dlžník\";\"Adresa dlžníka\";\"Mesto\";\"Typ dane\";\"Suma daòových nedoplatkov\";\"Mena\";\"Variabilný symbol\";\"Špecifický symbol\"";
+    private static final String CSV_HEADER = "\"ID\";\"DlÅ¾nÃ­k\";\"Adresa dlÅ¾nÃ­ka\";\"Mesto\";\"Typ dane\";\"Suma daÅˆovÃ½ch nedoplatkov\";\"Mena\";\"VariabilnÃ½ symbol\";\"Å pecifickÃ½ symbol\"";
 
     @DataUnit.AsOutput(name = "filesOutput")
     public WritableFilesDataUnit filesOutput;
@@ -257,6 +258,7 @@ public class SkMartinDebtors extends AbstractDpu<SkMartinDebtorsConfig_V1> {
             resource.setSize(outputFile.length());
             ResourceHelpers.setResource(filesOutput, OUTPUT_FILE_NAME, resource);
             filesOutput.addExistingFile(OUTPUT_FILE_NAME, outputFile.toURI().toASCIIString());
+            VirtualPathHelpers.setVirtualPath(filesOutput, OUTPUT_FILE_NAME, OUTPUT_FILE_NAME);
         } catch (Exception ex) {
             throw ContextUtils.dpuException(ctx, ex, "SkMartinDebtors.execute.exception");
         }
